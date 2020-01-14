@@ -1,4 +1,7 @@
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+This project was bootstrapped with [Create React App] and is based on React Tutorial
+but use latest features from React 16.8 which are functions and hooks
+(https://github.com/facebook/create-react-app).
+https://reactjs.org/tutorial/tutorial.html#lifting-state-up
 
 ## Available Scripts
 
