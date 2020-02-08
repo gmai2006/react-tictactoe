@@ -3,6 +3,8 @@ but use latest features from React 16.8 which are functions and hooks
 (https://github.com/facebook/create-react-app).
 https://reactjs.org/tutorial/tutorial.html#lifting-state-up
 
+This tictactoe game has a simple computer player that can play against a human player.
+
 ## Available Scripts
 
 In the project directory, you can run:
