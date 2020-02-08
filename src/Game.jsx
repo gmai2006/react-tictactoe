@@ -45,15 +45,43 @@ const getCols = (currentBoard) => {
   ];
 }
 
+const getForwardDiagonal = (currentBoard) => {
+  return [
+    currentBoard.slice(0, 1).concat(currentBoard.slice(4, 5)).concat(currentBoard.slice(8, 9))
+  ];
+}
+
+const getbackwardDiagonal = (currentBoard) => {
+  return [
+    currentBoard.slice(2, 3).concat(currentBoard.slice(4, 5)).concat(currentBoard.slice(6, 7))
+  ];
+}
+
+const transposeForwardDiagonal = (cell) => {
+  if (cell === -1) return -1;
+  else if (cell === 0) return 0;
+  else if (cell == 1) return 4;
+  else return 8;
+}
+
+const transposeBackwardDiagonal = (cell) => {
+  if (cell === -1) return -1;
+  else if (cell === 0) return 2;
+  else if (cell == 1) return 4;
+  else return 6;
+}
+
 /**
  * Transpose row back to col.
  * @param {*} cell 
  */
 const transpose = (cell) => {
+  if (cell === -1) return -1;
   const col = Math.floor(cell / 3);
   const row = cell % 3;
   return row * 3 + col;
 }
+
 
 /**
  * computer player move
@@ -62,23 +90,45 @@ const transpose = (cell) => {
  * 3. If none is found.  Find a defensive move by row
  * 4. Find a defensive move by col
  * 5. If none is found, just pick an empty cell.
- * TODO: Find orthogonal moves
  * @param {*} currentBoard 
  */
 const findNextMove = (currentBoard) => {
-  const rowWinningMove = possibleMove(getRows(currentBoard), 'O');
-  if (rowWinningMove >= 0) return rowWinningMove;
+  const offensiveMove = findOffensiveMoves(currentBoard);
+  if (offensiveMove > -1) return offensiveMove;
 
-  const colWinningMoves = transpose(possibleMove(getCols(currentBoard), 'O'));
-  if (colWinningMoves >= 0) return colWinningMoves;
-
-  const rowDefensiveMove = possibleMove(getRows(currentBoard), 'X');
-  if (rowDefensiveMove >= 0) return rowDefensiveMove;
-
-  const colDefensiveMove = transpose(possibleMove(getCols(currentBoard), 'X'));
-  if (colDefensiveMove >= 0) return colDefensiveMove;
+  const defensiveMove = findDefensiveMoves(currentBoard);
+  if (defensiveMove > -1) return defensiveMove;
 
   return currentBoard.findIndex((value) => value === undefined);
+}
+
+const findOffensiveMoves = (currentBoard) => {
+  return findBestMoves(currentBoard, 'O');
+}
+
+const findDefensiveMoves = (currentBoard) => {
+  return findBestMoves(currentBoard, 'X');
+}
+
+const findBestMoves = (currentBoard, symbol) => {
+  const rowWinningMove = possibleMove(getRows(currentBoard), symbol);
+  if (rowWinningMove >= 0) return rowWinningMove;
+  
+  const colWinningMoves = transpose(possibleMove(getCols(currentBoard), symbol));
+  if (colWinningMoves >= 0) return colWinningMoves;
+
+  const forwardDiagonalMoves = transposeForwardDiagonal(
+    possibleMove(getForwardDiagonal(currentBoard), symbol));
+
+  console.log(transposeForwardDiagonal(possibleMove(getForwardDiagonal(currentBoard), symbol)));
+  if (forwardDiagonalMoves >= 0) return forwardDiagonalMoves;
+ 
+  const backwardDiagonalMoves = transposeBackwardDiagonal(
+    possibleMove(getbackwardDiagonal(currentBoard), symbol));
+
+  if (backwardDiagonalMoves >= 0) return backwardDiagonalMoves;
+
+  return -1;
 }
 
 /**
@@ -87,7 +137,7 @@ const findNextMove = (currentBoard) => {
  * @param {*} symbol - X or O
  */
 const possibleMove = (rows, symbol) => {
-    
+  // console.log(rows);
   const indices = rows
       .map((row, index) => twoInTheSameRow(row, index, symbol))
       .filter(val => val >= 0);
