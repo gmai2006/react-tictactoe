@@ -55,22 +55,37 @@ const transpose = (cell) => {
   return row * 3 + col;
 }
 
+/**
+ * computer player move
+ * 1. Find a posible wining move by row
+ * 2. Find a posible winning move by col
+ * 3. If none is found.  Find a defensive move by row
+ * 4. Find a defensive move by col
+ * 5. If none is found, just pick an empty cell.
+ * TODO: Find orthogonal moves
+ * @param {*} currentBoard 
+ */
 const findNextMove = (currentBoard) => {
   const rowWinningMove = possibleMove(getRows(currentBoard), 'O');
   if (rowWinningMove >= 0) return rowWinningMove;
 
-  const colWinningMoves = transpose(possibleMove(getCols(currentBoard), 'X'));
+  const colWinningMoves = transpose(possibleMove(getCols(currentBoard), 'O'));
   if (colWinningMoves >= 0) return colWinningMoves;
 
   const rowDefensiveMove = possibleMove(getRows(currentBoard), 'X');
   if (rowDefensiveMove >= 0) return rowDefensiveMove;
 
-  const colDefensiveMove = transpose(possibleMove(getRows(currentBoard), 'X'));
+  const colDefensiveMove = transpose(possibleMove(getCols(currentBoard), 'X'));
   if (colDefensiveMove >= 0) return colDefensiveMove;
 
   return currentBoard.findIndex((value) => value === undefined);
 }
 
+/**
+ * Search for two symbols in the same row.
+ * @param {*} rows - an array or rows.
+ * @param {*} symbol - X or O
+ */
 const possibleMove = (rows, symbol) => {
     
   const indices = rows
@@ -84,11 +99,34 @@ const possibleMove = (rows, symbol) => {
   return filtered[0];
 }
 
-const twoInTheSameRow = (arr, rowIndex, symbol) => {
-  if( arr.filter(ele => ele === symbol).length === 2) {
-    return rowIndex * 3 + arr.findIndex(ele => ele === undefined);
+/**
+ * Check for two same player move in the same row.
+ * @param {*} row 
+ * @param {*} rowIndex 
+ * @param {*} symbol 
+ */
+const twoInTheSameRow = (row, rowIndex, symbol) => {
+  const twoSymbols = row.filter(ele => ele === symbol).length === 2;
+  const anEmptyCell = row.filter(ele => ele === undefined).length === 1;
+  if(twoSymbols && anEmptyCell) {
+    return rowIndex * 3 + row.findIndex(ele => ele === undefined);
   }
   return -1;
+}
+
+const calculateWinner = (squares) => {
+  if (squares.length <= 0) return null;
+  const result = lines.filter(line => {
+    const [a, b, c] = line;
+    return squares[a] && squares[a] === squares[b] && squares[a] === squares[c];
+  });
+
+  if (result.length> 0) return result[0];
+  return null;
+}
+
+const isGameOver = (squares) => {
+  return squares.filter(ele => ele !== undefined).length === squares.length;
 }
 
 function Game() {
@@ -99,7 +137,8 @@ function Game() {
     const history = state.history;
     const current = history[history.length -1];
     const squares = current.squares.slice();
-
+    const gameOver = isGameOver(current.squares);
+    if (gameOver) return;
     if (calculateWinner(squares)) return;
 
     squares[i] = state.isNext ? 'X' : 'O';
@@ -117,22 +156,14 @@ function Game() {
     }
   });
 
-  const calculateWinner = (squares) => {
-    if (squares.length <= 0) return null;
-    const result = lines.filter(line => {
-      const [a, b, c] = line;
-      return squares[a] && squares[a] === squares[b] && squares[a] === squares[c];
-    });
-
-    if (result.length> 0) return result[0];
-    return null;
-  }
-
+  
   const getStatus = () => {
     const current = state.history[state.nextStep];
     const winner = calculateWinner(current.squares);
     if (winner) return 'Winner ' + (state.isNext? 'O' : 'X');
-    else return 'Next player: ' + (state.isNext? 'X' : 'O');
+    const gameOver = isGameOver(current.squares);
+    if (gameOver) return 'Game is draw!!! ';
+    return 'Next player: ' + (state.isNext? 'X' : 'O');
   }
 
   const moves = state.history.map((step, move) => {
