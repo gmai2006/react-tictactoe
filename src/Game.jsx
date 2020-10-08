@@ -60,14 +60,14 @@ const getbackwardDiagonal = (currentBoard) => {
 const transposeForwardDiagonal = (cell) => {
   if (cell === -1) return -1;
   else if (cell === 0) return 0;
-  else if (cell == 1) return 4;
+  else if (cell === 1) return 4;
   else return 8;
 }
 
 const transposeBackwardDiagonal = (cell) => {
   if (cell === -1) return -1;
   else if (cell === 0) return 2;
-  else if (cell == 1) return 4;
+  else if (cell === 1) return 4;
   else return 6;
 }
 
